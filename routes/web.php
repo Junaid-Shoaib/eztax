@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\CalculatorController;
+use App\Http\Controllers\FileExplorerController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +70,13 @@ Route::delete('notices/{notice}', [NoticeController::class, 'destroy'])
 Route::get('/calculator', [CalculatorController::class, 'index'])
     ->name('calculator')->middleware('auth');
 
-Route::post('/getSalary', [CalculatorController::class, 'getSalary'])
-    ->name('getSalary')->middleware('auth');
+Route::post('/calculate-tax', [CalculatorController::class, 'calculate'])
+    ->name('calculate.tax')->middleware('auth');
 
+
+Route::get('/file-manager/{folder?}', [FileExplorerController::class, 'index'])
+    ->where('folder', '.*')->name('file.manager');
+Route::get('/file-managers/download/{path}', [FileExplorerController::class, 'download'])
+    ->where('path', '.*')->name('file.download');
+Route::delete('/file-managers/delete', [FileExplorerController::class, 'delete'])
+    ->name('file.delete');

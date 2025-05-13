@@ -8,12 +8,12 @@
                 <div class="card-header">{{ __('Salary Case') }}</div>
 
                 <div class="card-body">
-                <form method="GET" action="/" name="form2">
-                    @csrf
-                    <input type="text" name="salary" id="salary" class="form-control" placeholder="Enter annual salary here"/>
-                    <button class="btn btn-primary" type="submit" id='sub'>Calculate Tax</button>
-                    <input type="text" name="tax" id="tax" class="form-control"/>
-                </form>                    
+                    <input type="number" id="monthly_income" placeholder="Enter Monthly Income">
+                    <button id="calculateBtn">Calculate</button>
+
+                    <div id="results" style="margin-top:20px;">
+                        <!-- Result will appear here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -23,37 +23,35 @@
 
 @section('script')
 <script>
-$(document).ready(function() {
+    $(document).ready(function(){
 
-    $(document).on("keydown", ":input:not(textarea):not(:submit)", function(event) {
-    if(event.keyCode == 13) {
-        event.preventDefault();
-        return false;
+    $('#calculateBtn').on('click', function () {
+        let income = $('#monthly_income').val();
+        var num = true
+        if(income == '' && income <= 0){
+            alert('Please Correct Value');
+            return false;
         }
-    });
-
-    $("#sub").click(function(e) {
-            e.preventDefault();
-            var sal = $('#salary').val()
-
-            fetch('/getSalary', {
-                method: 'POST',
-                headers: {
-                  "X-CSRF-TOKEN":"{{ csrf_token() }}",
-                },
-                body: JSON.stringify({
-                    'salary': sal,
-                })
-            })
-            .then((response) => {
-                    return response.json();
-                })
-                .then((data) => {
-                    // console.log(data);
-                    $('#tax').val(data);
-                })            
-
+        $.ajax({
+            url: '{{ route("calculate.tax") }}',
+            method: 'POST',
+            data: {
+                income: income,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                $('#results').html(`
+                    <p><strong>Monthly Income:</strong> ${response.monthly_income}</p>
+                    <p><strong>Monthly Tax:</strong> ${response.monthly_tax}</p>
+                    <p><strong>Salary After Tax:</strong> ${response.salary_after_tax}</p>
+                    <p><strong>Yearly Income:</strong> ${response.yearly_income}</p>
+                    <p><strong>Yearly Tax:</strong> ${response.yearly_tax}</p>
+                    <p><strong>Yearly Income After Tax:</strong> ${response.yearly_income_after_tax}</p>
+                `);
+            }
+        });
     });
 });
+    
 </script>
 @endsection
